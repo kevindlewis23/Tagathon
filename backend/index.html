@@ -16,9 +16,11 @@
     </style>
   </head>
   <body>
+    <p>User phone number: <span id = "PhoneNumber"></span></p>
     <form id="form2" action="">
         <input id="input2" autocomplete="off" />
         <input id="input3" autocomplete="off" />
+        <input id="input4" autocomplete="off" />
         <button>Send</button>
       </form>
 
@@ -43,9 +45,15 @@
             socket.emit('poll');
       });
 
+      // socket.on('joinRoom', function(room){
+      //   // Join the room
+      //   socket.join(room);
+      // });
+
       var messages = document.getElementById('messages');
       var form = document.getElementById('form');
       var input = document.getElementById('input');
+      var phoneNumber = document.getElementById('PhoneNumber');
 
       form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -63,6 +71,9 @@
         if (input2.value && input3.value) {
           socket.emit('signup', {phone: input2.value, name: input3.value});
           
+        }
+        if (input4.value) {
+          socket.emit('joinRoom', {room: input4.value});
         }
       });
 
