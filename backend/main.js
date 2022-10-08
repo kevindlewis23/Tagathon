@@ -2,6 +2,7 @@
 const express = require('express');
 const app = express();
 const server = require('http').Server(app);
+var util = require('util')
 // Create socket io with cors
 const io = require('socket.io')(server, {
     cors: {
@@ -14,12 +15,20 @@ const cors = require('cors');
 
 const port = 3000 || process.env.PORT;
 
+
+// Session and users
+const users = require('./users.js');
+const rooms = require('./room.js');
+
+
 // Basic get request
 // Allow cors
 app.use(cors({origin: true}));
 app.get('/', (req, res) => {
     // Send data as json
-    res.json(data);
+    // Set the header to json
+    res.setHeader('Content-Type', 'application/json');
+    res.send(util.inspect(data));
 });
 
 
@@ -31,44 +40,26 @@ const data = {
     connections: 0
 };
 
-
+users.setupPolling(io, data);
 
 // Socket.io connection
 io.on('connection', (socket) => {
     // Recieve New Users
     // newConnData = {phone: "##########"}
-    socket.on('newConnection', function(newConnData){
-        if (newConnData != null) {
-            console.log("Connected to user: " + socket.id);
-            data.connections++;
-            data.sessions.push({
-                id: socket.id,
-                user: null,
-                lastPolled: Date.now()
-            });
-        }
-    });
+    socket.on('newConnection', () =>  users.receiveNewConnection(data, socket));
 
     // Process Polling
-    socket.on('poll', function(){
-        // find client with id of socket.id
-        let client = data.sessions.find(client => client.id == socket.id);
+    socket.on('poll', () => users.receivePoll(data, socket));
 
-        client.lastPolled = Date.now();
-    });
 
     // Recieve Login
-    socket.on('login', function(loginData){
-        console.log("Logging in...")
-        // find client with id of socket.id
-        let client = data.sessions.find(client => client.id == socket.id);
-
-        // Login the client
-        return login(client, loginData.phone);
-    });
+    socket.on('login', loginData => users.receiveLogin(data, socket, loginData));
 
     // Recieve Signup
-    socket.on('signup', signUpData => recieveSignUp(socket, signUpData));
+    socket.on('signup', signUpData => users.recieveSignUp(data, socket, signUpData));
+
+    // Recieve Room Join Request
+    socket.on('joinRoom', roomData => rooms.receiveRoomJoin(data, socket, roomData));
     
 });
 
@@ -76,3 +67,4 @@ io.on('connection', (socket) => {
 server.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)
 });
+
