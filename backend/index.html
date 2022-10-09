@@ -89,7 +89,7 @@
       form3.addEventListener('submit', function(e) {
         e.preventDefault();
         if (input4.value) {
-          socket.emit('joinRoom', {room: input4.value});
+          socket.emit('createRoom', {room: input4.value});
         }
                 
       });
