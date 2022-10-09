@@ -3,6 +3,18 @@ module.exports = {
     // Join Room and create it if it doesn't already exist
     // check if room exists in data.rooms'
     let room = data.rooms.find(room => room.name == roomData.room);
+    if (room != undefined){
+      // find user in data.users.session by socket.id
+      let user = data.users.find(user => user.session.id === socket.id);
+      room.AddUser(user);
+      user.room = room;
+    }
+  },
+
+  receiveRoomCreate: function(data, socket, roomData, io){
+    // Join Room and create it if it doesn't already exist
+    // check if room exists in data.rooms'
+    let room = data.rooms.find(room => room.name == roomData.room);
     if (room == undefined){
       // create room
       room = new Room(roomData.room, io);
@@ -13,7 +25,7 @@ module.exports = {
     let user = data.users.find(user => user.session.id === socket.id);
     room.AddUser(user);
     user.room = room;
-  },
+  }
 }
 
 class Room {
@@ -129,12 +141,10 @@ class Room {
     // close room
     this.io.to("this.name").emit("leaveRoom");
   };
-};
 
 
-
-// Basic game modes
-const gameModes = {
+  // Basic game modes
+  static gameModes = {
   // Classic game mode
   classic: {
     initialize: function() {
@@ -142,9 +152,13 @@ const gameModes = {
       this.setRandomTagger();
       // Set the start Time
       this.startTime = Date.now();
+      this.gameTime = 10 * 60 * 1000
     },
     endState: function() {
-      // Check
+      // Check if enough time has passed
+  
+      return Date.now() - this.startTime > gameTime;
+
 
     }
 
@@ -163,6 +177,14 @@ const gameModes = {
     
   }
 }
+
+
+
+  
+};
+
+
+
 
 function stringify(state) {
   return JSON.stringify(state, (key, value) => {
