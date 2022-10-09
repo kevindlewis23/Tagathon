@@ -46,10 +46,6 @@ class Room {
     this.name = roomName;
     this.io = io;
 
-    let gameFramework = Room.gameModes.classic;
-    if (gameType == 'infection'){ 
-      gameFramework = Room.gameModes.infection;
-    }
 
     this.STATE = {
       // user reference, isTagger, isTaggable, Visible (0-1)
@@ -70,9 +66,9 @@ class Room {
     // if they are not active, then they are tagged
     // loop through all the users and check if they are active
     this.STATE.playerStates.forEach((playerState, index) => {
-      if (!playerState.user.active){
+      if (playerState.user.session == null){
         // if they are not active, then they are tagged
-        this.STATE.playerStates.remove(index);
+        this.STATE.playerStates.splice(index, 1);
       }
     });
 
