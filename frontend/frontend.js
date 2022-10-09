@@ -6,8 +6,31 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MapView from 'react-native-maps';
 //import Geolocation from 'react-native-geolocation-service';
 import * as Location from 'expo-location';
+import { io } from "socket.io-client";
 
 const Stack = createNativeStackNavigator();
+
+// Create Socket io instance
+const socket = io("http://localhost:3000");
+
+let STATE = null;
+
+      // Notify the server that the user has connected
+      socket.on('connect', function(){
+        // Randomly generate a 10 digit number and cast as string
+        let num = Math.floor(Math.random() * 10000000000).toString();
+
+        socket.emit('newConnection', {phone: num});
+      });
+      socket.on('poll', function(){
+          // Send back a poll
+            socket.emit('poll');
+      });
+
+      socket.on('state', function(data){
+          STATE = data;
+          console.log(STATE);
+      });
 
 const MainMenuButton = ({ onPress, title }) => (
     <TouchableOpacity onPress={onPress} style={styles.buttonContainer}>
