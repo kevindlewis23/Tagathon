@@ -16,7 +16,7 @@ function getSession(data, id) {
 
 
 
-function removeClient(client){
+function removeClient(data, client){
     console.log("Removed client: " + client.name);
     // Remove this session from the user if it exists
     data.sessions.splice(data.sessions.indexOf(client), 1);
@@ -122,7 +122,7 @@ module.exports = {
                 // Check if client has responded
                 if (Date.now() - client.lastPolled > maxInterval) {
                     // if client has not polled in 10 seconds, remove them from the data
-                    removeClient(client);
+                    removeClient(data, client);
                 }
             });
                 

@@ -59,7 +59,13 @@ io.on('connection', (socket) => {
     socket.on('signup', signUpData => users.recieveSignUp(data, socket, signUpData));
 
     // Recieve Room Join Request
-    socket.on('joinRoom', roomData => rooms.receiveRoomJoin(data, socket, roomData));
+    socket.on('joinRoom', roomData => rooms.receiveRoomJoin(data, socket, roomData, io));
+
+    // Receive location update
+    socket.on('updateLocation', locationData => users.receiveLocationUpdate(data, socket, locationData));
+
+    // Receive a tag
+    socket.on('tag', tagData => rooms.receiveTag(data, socket, tagData));
     
 });
 
