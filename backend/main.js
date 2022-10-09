@@ -62,7 +62,7 @@ io.on('connection', (socket) => {
     socket.on('joinRoom', roomData => rooms.receiveRoomJoin(data, socket, roomData, io));
 
     // Recieve Room Create Request
-    socket.on('joinRoom', roomData => rooms.receiveRoomCreate(data, socket, roomData, io));
+    socket.on('createRoom', roomData => rooms.receiveRoomCreate(data, socket, roomData, io));
 
     // Receive location update
     socket.on('updateLocation', locationData => users.receiveLocationUpdate(data, socket, locationData));
