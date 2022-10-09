@@ -147,30 +147,53 @@ class Room {
   static gameModes = {
   // Classic game mode
   classic: {
+    taggerVisibility: 0.5,
+    taggableVisibility: 0.7,
     initialize: function() {
       // Set the tagger
       this.setRandomTagger();
       // Set the start Time
       this.startTime = Date.now();
-      this.gameTime = 10 * 60 * 1000
+      this.gameTime = 10 * 60 * 1000;
     },
     endState: function() {
       // Check if enough time has passed
   
       return Date.now() - this.startTime > gameTime;
 
+    },
+    tagBehavior: function(tagged, tagger) {
+      // Make the tagged player the tagger
+      tagged.isTagger = true;
+      tagger.isTagger = false;
+
+      // Set the tagger's visibility
+      tagger.visibility = 0;
+      tagged.visibility = this.taggerVisibility;
+
+      // Make the tagger not taggable
+      tagger.isTaggable = false;
+      tagged.isTaggable = false;
+
+      // Make the tagger taggable in 5 seconds
+      setTimeout(() => {
+        tagger.isTaggable = true;
+        tagger.visibility = this.taggableVisibility;
+      }, 5000);
 
     }
-
-
   },
   infection: {
     initialize: function() {
       // Set the tagger
       this.setRandomTagger();
+      // Set the start Time
+      this.startTime = Date.now();
     },
     endState: function() {
+      
       // Check if there is only one taggable player left
+      return this.STATE.playerStates.filter((player) => player.isTaggable).length == 1;
       
 
     }
