@@ -3,7 +3,9 @@ import { View, Text, StyleSheet, Button, TouchableOpacity, Alert, Dimensions, Pl
 import { setWarningFilter } from 'react-native/Libraries/LogBox/Data/LogBoxData';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import MapView from 'react-native-maps';
+import MapView, { Camera, Marker } from 'react-native-maps';
+import { io }  from 'socket.io/client-dist/socket.io';
+
 //import Geolocation from 'react-native-geolocation-service';
 import * as Location from 'expo-location';
 
@@ -53,54 +55,64 @@ const Menu = ({ navigation }) => {
 //Room page
 //Display info with who is in your game and all that jazz
 
-
-const Map = () => {
-    return (
-        <View style={styles.mapContainer}>
-          <MapView style={styles.map} showsUserLocation={true}/>
-          <TagButton title="Tag"/>
-        </View>
-    );
-  }
-
-const MapCameraFixed = () => {
-  
+const Map = (markers) => {
   return (
-
     <View style={styles.mapContainer}>
-      <MapView style={styles.map} showsUserLocation={true} initialCamera={cam}/>
+      <MapView style={styles.map} showsUserLocation={true} mapType="standard" followsUserLocation={true} zoomEnabled={true} scrollEnabled={true} rotateEnabled={true}>
+      {/* if (markers) 
+        {markers.playerStates.map((marker, index) => (
+        <Marker
+          key={index}
+          coordinate={{latitude: marker.user.gps.x, longitude: marker.user.gps.y}}
+          title={marker.title}
+          description={marker.description}
+          pinColor={'#BB0000'}
+        />
+        ))} */}
+      </MapView>
       <TagButton title="Tag"/>
     </View>
   );
 }
 
-  const Login = ({ navigation }) => {
-    const [text, setText] = useState('');
-    return (
-            <View>
-                <Text style={styles.titleText}>Info</Text>  
-                <View>
-                <TextInput
-                    style={{height: 40}}
-                    placeholder="Type here to translate!"
-                    onChangeText={newText => setText(newText)}
-                    defaultValue={text}
-                  />
-                    <TextInput
-                    style={{height: 40}}
-                    placeholder="Type here to translate!"
-                    onChangeText={newText => setText(newText)}
-                    defaultValue={text}
-                  />
+const Login = ({ navigation }) => {
+  const [name, setName] = useState('');
+  const [pn, setPn] = useState('');
+  const [room, setRoom] = useState('');
+
+  const socket = io("http://localhost:3000");
+  
+  const signUp = () => socket.emit('signup', {phone: pn, name: name});
+
+  return (
+          <View>
+              <Text style={styles.titleText}>Info</Text>  
+              <View>
+                <Text style={formText}>Name</Text>
+              <TextInput
+                  style={{height: 40}}
+                  placeholder="Name"
+                  onChangeText={newName => setName(newName)}
+                  defaultValue={name}
+                />
+                <Text style={formText}>Phone Number</Text>
                   <TextInput
-                    style={{height: 40}}
-                    placeholder="Type here to translate!"
-                    onChangeText={newText => setText(newText)}
-                    defaultValue={text}
-                  />                    
-                </View>
-            </View>
-    )
+                  style={{height: 40}}
+                  placeholder="Phone Number"
+                  onChangeText={newPn => setPn(newPn)}
+                  defaultValue={pn}
+                />
+                <Text style={formText}>Room</Text>
+                <TextInput
+                  style={{height: 40}}
+                  placeholder="Room"
+                  onChangeText={newRoom => setRoom(newRoom)}
+                  defaultValue={room}
+                />
+                <MainMenuButton title="Play"  onPress={() => {signUp(); navigation.navigate('Map')}}/>
+              </View>
+          </View>
+  )
 }
 
 export const getLocation = () => {
@@ -171,6 +183,23 @@ const styles = StyleSheet.create({
       marginBottom: 40,
       fontFamily: 'lucida grande',
   }, 
+  
+  formText: {
+    fontSize: 24,
+    color: "red",
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 40,
+    fontFamily: 'lucida grande',
+},
+
+formBox: {
+  borderRadius: 10,
+  paddingVertical: 10,
+  paddingHorizontal: 12,
+  textAlign: 'center',
+  justifyContent: 'center'
+},
 
   tagButtonContainer: {
       justifyContent: 'center', 
