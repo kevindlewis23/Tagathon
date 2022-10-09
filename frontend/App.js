@@ -1,19 +1,18 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Button, Alert } from 'react-native'; 
-import { Main } from './frontend'
+import { createAppContainer } from "react-navigation";
+import { createStackNavigator } from "react-navigation-stack";
 
-export default function App() {
+import page from "./screens/page";
+import page2 from "./screens/page2";
 
-return(
-  <View style={styles.container_main}>   
-    <Main/>
-  </View>
-)
-}
+const AppNavigator = createStackNavigator(
+    {
+        page,
+        page2
 
-const styles = StyleSheet.create({
-  container_main: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-});
+    },
+    {
+        headerMode: "none"
+    }
+);
+
+export default createAppContainer(AppNavigator);

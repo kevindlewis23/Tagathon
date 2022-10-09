@@ -108,7 +108,8 @@ module.exports = {
         data.sessions.push({
             id: socket.id,
             user: null,
-            lastPolled: Date.now()
+            lastPolled: Date.now(),
+            active: true,
         });
     },
 
@@ -122,7 +123,11 @@ module.exports = {
                 // Check if client has responded
                 if (Date.now() - client.lastPolled > maxInterval) {
                     // if client has not polled in 10 seconds, remove them from the data
-                    removeClient(data, client);
+                    //removeClient(data, client);
+                    client.active = false;
+                }
+                else {
+                    client.active = true;
                 }
             });
                 

@@ -46,17 +46,18 @@ class Room {
     this.name = roomName;
     this.io = io;
 
+    let gameFramework = Room.gameModes.classic;
+    if (gameType == 'infection'){ 
+      gameFramework = Room.gameModes.infection;
+    }
+
     this.STATE = {
       // user reference, isTagger, isTaggable, Visible (0-1)
       playerStates: [],
       phase: this.PHASES.LOBBY,
-      endState: function() {
-        
-      },
-      initialize: function() {
-
-      }
     };
+
+    
     this.updateLoop = setInterval(this.update, this.interval);
   };
   interval = 500;
@@ -65,6 +66,15 @@ class Room {
   update = () => {
 
     // Check that all users are still connected (Done for every phase)
+    // Look at all the users and see if they are all active
+    // if they are not active, then they are tagged
+    // loop through all the users and check if they are active
+    this.STATE.playerStates.forEach((playerState, index) => {
+      if (!playerState.user.active){
+        // if they are not active, then they are tagged
+        this.STATE.playerStates.remove(index);
+      }
+    });
 
     // Switch on the phase
     switch (this.STATE.phase) {
@@ -142,63 +152,105 @@ class Room {
     this.io.to("this.name").emit("leaveRoom");
   };
 
+  initializePlayerStates = (numTaggers) => {
+    // Set all players to be taggable
+    this.STATE.playerStates.forEach((player) => {
+      player.isTaggable = true;
+      player.visibility = this.STATE.taggableVisibility;
+    });
 
+    let randomIndex = Math.floor(Math.random() * this.STATE.playerStates.length);
+    this.STATE.playerStates[randomIndex].isTagger = true;
+    this.STATE.playerStates[randomIndex].isTaggable = false;
+    this.STATE.playerStates[randomIndex].visbility = this.STATE.taggerVisibility;
+  };
+
+  startGame = gameType => {
+
+    // Set the game mode
+    let gameFramework = Room.gameModes.classic;
+    if (gameType == 'infection'){ 
+      gameFramework = Room.gameModes.infection;
+    }
+
+    this.STATE = {
+      ...this.STATE,
+      ...gameFramework,
+    }
+
+    // Go tot the next phase
+    this.NextPhase();
+
+  }
+
+ 
   // Basic game modes
   static gameModes = {
-  // Classic game mode
-  classic: {
-    taggerVisibility: 0.5,
-    taggableVisibility: 0.7,
-    initialize: function() {
-      // Set the tagger
-      this.setRandomTagger();
-      // Set the start Time
-      this.startTime = Date.now();
-      this.gameTime = 10 * 60 * 1000;
-    },
-    endState: function() {
-      // Check if enough time has passed
-  
-      return Date.now() - this.startTime > gameTime;
-
-    },
-    tagBehavior: function(tagged, tagger) {
-      // Make the tagged player the tagger
-      tagged.isTagger = true;
-      tagger.isTagger = false;
-
-      // Set the tagger's visibility
-      tagger.visibility = 0;
-      tagged.visibility = this.taggerVisibility;
-
-      // Make the tagger not taggable
-      tagger.isTaggable = false;
-      tagged.isTaggable = false;
-
-      // Make the tagger taggable in 5 seconds
-      setTimeout(() => {
-        tagger.isTaggable = true;
-        tagger.visibility = this.taggableVisibility;
-      }, 5000);
-
-    }
-  },
-  infection: {
-    initialize: function() {
-      // Set the tagger
-      this.setRandomTagger();
-      // Set the start Time
-      this.startTime = Date.now();
-    },
-    endState: function() {
-      
-      // Check if there is only one taggable player left
-      return this.STATE.playerStates.filter((player) => player.isTaggable).length == 1;
-      
-
-    }
+    // Classic game mode
+    classic: {
+      taggerVisibility: 0.5,
+      taggableVisibility: 0.7,
+      initialize: function() {
+        // Set the tagger
+        this.initializePlayerStates(1);
+        // Set the start Time
+        this.STATE.startTime = Date.now();
+        this.STATE.gameTime = 10 * 60 * 1000;
+      },
+      endState: function() {
+        // Check if enough time has passed
     
-  }
+        return Date.now() - this.STATE.startTime > gameTime;
+
+      },
+      tagBehavior: function(tagged, tagger) {
+
+        // Make the tagged player the tagger
+        tagged.isTagger = true;
+        tagger.isTagger = false;
+
+        // Set the tagger's visibility
+        tagger.visibility = 0;
+        tagged.visibility = this.STATE.taggerVisibility;
+
+        // Make the tagger not taggable
+        tagger.isTaggable = false;
+        tagged.isTaggable = false;
+
+        // Make the tagger taggable in 5 seconds
+        setTimeout(() => {
+          tagger.isTaggable = true;
+          tagger.visibility = this.STATE.taggableVisibility;
+        }, 5000);
+
+      }
+    },
+    infection: {
+      taggerVisibility: 1,
+      taggableVisibility: 0.4,
+      initialize: function() {
+        // Set the tagger
+        this.initializePlayerStates(1);
+        // Set the start Time
+        this.STATE.startTime = Date.now();
+      },
+      endState: function() {
+        
+        // Check if there is only one taggable player left
+        return this.STATE.playerStates.filter((player) => player.isTaggable).length == 1;
+        
+
+      },
+      tagBehavior: function(tagged, tagger) {
+        // Make the tagged player a tagger
+        tagged.isTagger = true;
+        
+        // Set the tagger's visibility
+        tagged.visibility = this.STATE.taggerVisibility;
+      }
+
+      
+    }
 }
 
 
