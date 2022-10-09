@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Button, TouchableOpacity, Alert, Dimensions, Platform} from 'react-native';
+import { View, Text, StyleSheet, Button, TouchableOpacity, Alert, Dimensions, Platform, TextInput} from 'react-native';
 import { setWarningFilter } from 'react-native/Libraries/LogBox/Data/LogBoxData';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -27,6 +27,7 @@ export const Main = () => {
           <Stack.Navigator>
             <Stack.Screen name="Menu" component={Menu}/>
             <Stack.Screen name="Map" component={Map}/>
+            <Stack.Screen name="Login" component={Login}/>
           </Stack.Navigator>
         </NavigationContainer>
       );
@@ -38,7 +39,7 @@ const Menu = ({ navigation }) => {
             <View style={styles.container}>
                 <Text style={styles.titleText}>Tagathon</Text>  
                 <View>
-                    <MainMenuButton title="Play"  onPress={() => navigation.navigate('Map')}/>
+                    <MainMenuButton title="Start"  onPress={() => navigation.navigate('Login')}/>
                     <MainMenuButton title="Stats"  onPress={() => TESTGEO()}/>
                     <MainMenuButton title="Settings"  onPress={() => Alert.alert('Settings')}/>
                     <MainMenuButton title="Help"  onPress={() => Alert.alert('Kevin?')}/>                    
@@ -46,6 +47,12 @@ const Menu = ({ navigation }) => {
             </View>
     )
 }
+
+//SIgn in user
+//Select room you want to join
+//Room page
+//Display info with who is in your game and all that jazz
+
 
 const Map = () => {
     return (
@@ -55,6 +62,46 @@ const Map = () => {
         </View>
     );
   }
+
+const MapCameraFixed = () => {
+  
+  return (
+
+    <View style={styles.mapContainer}>
+      <MapView style={styles.map} showsUserLocation={true} initialCamera={cam}/>
+      <TagButton title="Tag"/>
+    </View>
+  );
+}
+
+  const Login = ({ navigation }) => {
+    const [text, setText] = useState('');
+    return (
+            <View>
+                <Text style={styles.titleText}>Info</Text>  
+                <View>
+                <TextInput
+                    style={{height: 40}}
+                    placeholder="Type here to translate!"
+                    onChangeText={newText => setText(newText)}
+                    defaultValue={text}
+                  />
+                    <TextInput
+                    style={{height: 40}}
+                    placeholder="Type here to translate!"
+                    onChangeText={newText => setText(newText)}
+                    defaultValue={text}
+                  />
+                  <TextInput
+                    style={{height: 40}}
+                    placeholder="Type here to translate!"
+                    onChangeText={newText => setText(newText)}
+                    defaultValue={text}
+                  />                    
+                </View>
+            </View>
+    )
+}
 
 export const getLocation = () => {
   const [location, setLocation] = useState(null);
@@ -87,14 +134,6 @@ const styles = StyleSheet.create({
       //backgroundColor: 'green',
       textAlign: 'center',
       justifyContent: 'center'
-  },
-
-  //OVERWRITE THIS PROBABLY (just for default getLocation behavior)
-  paragraph: {
-    flex: 1,
-    backgroundColor: '#fff',
-    textAlign: 'center',
-    justifyContent: 'center'
   },
 
   titleText: {
@@ -159,7 +198,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: 5,
       },
 
-  map: {
+  map:{
         width: Dimensions.get('window').width,
         height: Dimensions.get('window').height,
         marginBottom: 55, 
